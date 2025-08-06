@@ -33,8 +33,5 @@
 ## Why ChimeraTui?
 tmux and zellij are great, but they’re multiplexers that take over your terminal. ChimeraTui is a lightweight overlay that enhances your terminal with reactive, customizable features like a file tree or optional tiling. Built in Rust with Ratatui, it’s fast, safe, and ready for your wild ideas. No bloat, no drama—just a terminal that works *your* way.
 
-## Contributing
-Got a plugin idea? Found a bug? Open an issue or PR on GitHub! Share your terminal dreams on X with `#ChimeraTui`.
-
 ## License
 MIT License. Do whatever you want, just keep the terminal’s soul alive.
