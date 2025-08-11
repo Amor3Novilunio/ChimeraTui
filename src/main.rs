@@ -1,6 +1,8 @@
 use color_eyre::Result;
-use crossterm::event::{self, Event};
+use crossterm::event::KeyCode;
 use ratatui::{DefaultTerminal, Frame, init};
+
+use chimera_twm::runtime::input::{TypeHandler,TypeHold,TypePress,TypeSpam,input_handler};
 
 // -----------
 // Entry Point
@@ -28,15 +30,22 @@ fn main() -> Result<()> {
     result
 }
 
+
+fn on_a_press() { println!("pressed A"); }
+fn on_a_spam()  { println!("spamming A"); }
+fn on_a_hold()  { println!("holding A"); }
+
 // ---------------
 // Rendering Area
 // ---------------
-fn alternative_screen_buffer(mut terminal: DefaultTerminal) -> Result<()> {
+fn alternative_screen_buffer(mut terminal: DefaultTerminal) -> Result<()> { 
+    terminal.draw(render)?;
     loop {
-        terminal.draw(render)?;
-        if matches!(event::read()?, Event::Key(_)) {
-            break Ok(());
-        }
+        input_handler(TypeHandler {
+            press: TypePress { key_code: KeyCode::Char('a'), handler: on_a_press },
+            spam: Some(TypeSpam { handler: on_a_spam }),
+            hold: Some(TypeHold { handler: on_a_hold }),
+        });
     }
 }
 
