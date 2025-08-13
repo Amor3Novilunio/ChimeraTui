@@ -1,6 +1,4 @@
-use std::time::{Duration, Instant};
-
-use crossterm::event::{self, Event, KeyCode};
+use crossterm::event::{self, Event, KeyCode, KeyModifiers};
 use ratatui;
 
 // ---------------------
@@ -10,26 +8,13 @@ use ratatui;
 // spam -> what would happen if spam is clicked
 // hold -> what would happen if you press hold on key
 // ---------------------
-pub struct TypeHandler {
-    pub press: TypePress,
-    pub spam: Option<TypeSpam>,
-    pub hold: Option<TypeHold>,
-}
-
-pub struct TypePress {
+pub struct InputProps {
     pub key_code: KeyCode,
+    pub key_modifiers: KeyModifiers,
     pub handler: fn(),
 }
 
-pub struct TypeSpam {
-    pub handler: fn(),
-}
-
-pub struct TypeHold {
-    pub handler: fn(),
-}
-
-pub fn input_handler(handler: TypeHandler) {
+pub fn input_handler(input: InputProps) {
     // ---------------------
     // Input Events Handler
     // ---------------------
@@ -37,13 +22,10 @@ pub fn input_handler(handler: TypeHandler) {
         Ok(res) => res,
         Err(err) => {
             ratatui::restore();
-            eprintln!("Key : {} Error : {} ", handler.press.key_code, err);
+            eprintln!("Key : {} Error : {} ", input.key_code, err);
             return;
         }
     };
-
-    let spam_cooldown = Duration::from_millis(200);
-    let hold_cooldown = Duration::from_millis(500);
 
     // -----------------------------------
     // Identify if the event is Key Input
@@ -53,41 +35,13 @@ pub fn input_handler(handler: TypeHandler) {
             // ---------------
             // Press Handling
             // ---------------
-            if key_event.code == handler.press.key_code {
-                let last_pressed_time = Instant::now();
-
-                // --------------
-                // Spam Handling | Spam press
-                // check the spam if it exist in memory first
-                // -------------------------------------------
-                if let Some(_spam) = &handler.spam {
-                    // ----------------------------------------------------------
-                    // checks if the button is being pressed before its cooldown
-                    // ----------------------------------------------------------
-                    if last_pressed_time.elapsed() >= spam_cooldown {
-                        (_spam.handler)();
-                        return;
-                    }
-                    // proceed to next logic if the conditions are not met
+            if key_event.code.to_string().to_lowercase()
+                == input.key_code.to_string().to_lowercase()
+                && key_event.modifiers == input.key_modifiers
+            {
+                if key_event.is_press() {
+                    (input.handler)()
                 }
-
-                // --------------
-                // Hold Handling | Holding press
-                // check the hold if it exist in memory first
-                // -------------------------------------------
-                if let Some(_hold) = &handler.hold {
-                    // --------------------------------------
-                    // checks if the button is being pressed
-                    // --------------------------------------
-                    if last_pressed_time.elapsed() >= hold_cooldown {
-                        (_hold.handler)();
-                        return;
-                    }
-                    // proceed to next logic if the conditions are not met
-                }
-
-                // Single Press
-                (handler.press.handler)();
             }
 
             // -------------
@@ -102,5 +56,5 @@ pub fn input_handler(handler: TypeHandler) {
             ratatui::restore();
             return;
         }
-    };
+    }
 }

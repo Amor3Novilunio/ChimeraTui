@@ -1,8 +1,8 @@
 use color_eyre::Result;
-use crossterm::event::KeyCode;
+use crossterm::event::{KeyCode, KeyModifiers};
 use ratatui::{DefaultTerminal, Frame, init};
 
-use chimera_twm::runtime::input::{TypeHandler,TypeHold,TypePress,TypeSpam,input_handler};
+use chimera_twm::runtime::input::{InputProps, input_handler};
 
 // -----------
 // Entry Point
@@ -30,26 +30,35 @@ fn main() -> Result<()> {
     result
 }
 
-
-fn on_a_press() { println!("pressed A"); }
-fn on_a_spam()  { println!("spamming A"); }
-fn on_a_hold()  { println!("holding A"); }
+fn on_a_press() {
+    println!("pressed A");
+}
 
 // ---------------
 // Rendering Area
 // ---------------
-fn alternative_screen_buffer(mut terminal: DefaultTerminal) -> Result<()> { 
+fn alternative_screen_buffer(mut terminal: DefaultTerminal) -> Result<()> {
+    // ---------------
+    // Render
+    // ---------------
     terminal.draw(render)?;
+
+    // ---------
+    // Variables
+    // ---------
+
+    // ---------------
+    // Input Handlers
+    // ---------------
     loop {
-        input_handler(TypeHandler {
-            press: TypePress { key_code: KeyCode::Char('a'), handler: on_a_press },
-            spam: Some(TypeSpam { handler: on_a_spam }),
-            hold: Some(TypeHold { handler: on_a_hold }),
+        input_handler(InputProps {
+            key_code: KeyCode::Char('a'),
+            key_modifiers:KeyModifiers::SHIFT,
+            handler: on_a_press,
         });
     }
 }
 
-
 fn render(frame: &mut Frame) {
-    frame.render_widget("hello", frame.area());
+    frame.render_widget("", frame.area());
 }
